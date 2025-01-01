@@ -23,6 +23,7 @@ export const getCollectionById = async (collectionId: number) => {
       where: { id: collectionId },
       include: {
         folder: true,
+        cards: true
       },
     });
 
