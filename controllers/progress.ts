@@ -15,8 +15,8 @@ export const createProgress = async (progressData: any) => {
   try {
     const progress = await prisma.progress.create({
       data: {
-        question_percents: progressData.question_percents,
-        card_percents: progressData.card_percents,
+        dateToRevision: new Date(),
+        progressCards: {connect: []},
         collectionId: progressData.collectionId,
         userId: progressData.userId,
       },
@@ -34,8 +34,8 @@ export const updateProgress = async (progressData: any, progressId: number) => {
         id: progressId,
       },
       data: {
-        question_percents: progressData.question_percents,
-        card_percents: progressData.card_percents,
+        dateToRevision: new Date(),
+        progressCards: {connect: []},
         dateUpdate: new Date()
       },
     });

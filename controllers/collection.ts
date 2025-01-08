@@ -3,14 +3,14 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 interface CollectionFormat {
-  userId: number;
+  creatorId: number;
   nameCollection: string;
   folders: Array<number>;
 }
 
-export const getAllCollectionPerson = async (userId: number) => {
+export const getAllCollectionPerson = async (creatorId: number) => {
   try {
-    const collectionData = await prisma.collection.findMany({ where: { userId: userId } });
+    const collectionData = await prisma.collection.findMany({ where: { creatorId: creatorId } });
 
     return { statusCode: 200, data: collectionData };
   } catch (error) {
@@ -67,7 +67,7 @@ export const createCollection = async (collection: CollectionFormat) => {
     const hasFolders = collection.folders && collection.folders.length > 0;
     const collectionData = await prisma.collection.create({
       data: {
-        userId: collection.userId,
+        creatorId: collection.creatorId,
         nameCollection: collection.nameCollection,
         folder: {
           connect: hasFolders
@@ -92,7 +92,7 @@ export const updateCollectionById = async (collection: CollectionFormat, collect
     const collectionData = await prisma.collection.update({
       where: { id: collectionId },
       data: {
-        userId: collection.userId,
+        creatorId: collection.creatorId,
         nameCollection: collection.nameCollection,
         dateUpdate: new Date(),
         folder: {

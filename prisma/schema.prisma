@@ -37,7 +37,7 @@ model User {
 
   folder Folder[]
   progress Progress[]
-  collection Collection[]
+  createdCollections Collection[]
   achievements Achievements[]
   associatedCollection UserCollection[]
 }
@@ -45,8 +45,8 @@ model User {
 // Collection dados
 model Collection {
   id Int @id @default(autoincrement())
-  userId Int 
-  user User @relation(fields: [userId], references: [id])
+  creatorId Int 
+  creator User @relation(fields: [creatorId], references: [id])
   
   folder Folder[]
   progress Progress[]
@@ -55,9 +55,11 @@ model Collection {
   dateUpdate DateTime @default(now())
   
   cards Card[]
-  //questions Question[]
   associatedCollection UserCollection[]
+  
   nameCollection String
+
+  //questions Question[]
 }
 
 model UserCollection {
@@ -121,10 +123,11 @@ model Progress {
   dateUpdate DateTime @default(now())
   dateCreated DateTime @default(now())
   
-  //question_percents Int @default(0)
-  //card_percents Int @default(0)
   progressCards ProgressCard[] 
   dateToRevision DateTime
+  
+  //question_percents Int @default(0)
+  //card_percents Int @default(0)|
 }
 
 model ProgressCard {
@@ -139,7 +142,6 @@ model ProgressCard {
   
   dateCreated DateTime @default(now())
 }
-
 
 // Folder dados
 model Folder {
