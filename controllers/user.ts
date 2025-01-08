@@ -6,7 +6,6 @@ export const getAllUsers = async () => {
   try {
     const Person = await prisma.user.findMany();
 
-
     return { statusCode: 200, data: Person };
   } catch (error) {
     return { statusCode: 500, data: error };
@@ -15,7 +14,10 @@ export const getAllUsers = async () => {
 
 export const getUserById = async (userId: number) => {
   try {
-    const Person = await prisma.user.findUnique({ where: { id: userId }, include: {folder: true, collection: true} });
+    const Person = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { folder: true, collection: true, progress: true },
+    });
 
     if (!Person) return { statusCode: 404, data: { error: "user not found" } };
 
@@ -41,7 +43,7 @@ export const createUser = async (user: UserFormat) => {
         lastName: user.lastName,
         password: user.password,
         number: user.number,
-        email: user.email
+        email: user.email,
       },
     });
 
@@ -61,7 +63,7 @@ export const UpdateUserById = async (user: UserFormat, userId: number) => {
         password: user.password,
         number: user.number,
         email: user.email,
-        dateUpdate: new Date()
+        dateUpdate: new Date(),
       },
     });
     if (!user) return { statusCode: 404, data: { error: "user not found" } };

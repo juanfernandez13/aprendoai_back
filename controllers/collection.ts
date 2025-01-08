@@ -17,6 +17,7 @@ export const getAllCollectionPerson = async (userId: number) => {
     return { statusCode: 500, data: "" };
   }
 };
+
 export const getCollectionById = async (collectionId: number) => {
   try {
     const collectionData = await prisma.collection.findUnique({
@@ -25,6 +26,19 @@ export const getCollectionById = async (collectionId: number) => {
         folder: true,
         cards: true
       },
+    });
+
+    return { statusCode: 200, data: collectionData };
+  } catch (error) {
+    return { statusCode: 500, data: "" };
+  }
+};
+export const searchCollection = async (searchQuery: string, page:number) => {
+  try {
+    const collectionData = await prisma.collection.findMany({
+      where: {nameCollection: {contains: searchQuery}},
+      take:12,
+      skip: 12*(page-1)
     });
 
     return { statusCode: 200, data: collectionData };

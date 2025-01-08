@@ -17,6 +17,11 @@ enum Role {
   USER
   ADMIN
 }
+enum CardStatus {
+  Good
+  Medium
+  Bad
+}
 
 model User {
   id Int @id @default(autoincrement())
@@ -44,13 +49,13 @@ model Collection {
   user User @relation(fields: [userId], references: [id])
   
   folder Folder[]
-  progress Progress?
+  progress Progress[]
   
   dateCreated DateTime @default(now())
   dateUpdate DateTime @default(now())
   
   cards Card[]
-  questions Question[]
+  //questions Question[]
   
   nameCollection String
 }
@@ -65,9 +70,10 @@ model Card {
   
   question String
   answer String
+  progress ProgressCard[]
 }
 
-model Question {
+/*model Question {
   id Int @id @default(autoincrement())
   collectionId Int
   collection Collection @relation(fields: [collectionId], references: [id])
@@ -89,23 +95,38 @@ model Item {
   
   value String
   isCorrect Boolean
-}
+}*/
 
 //Um usuário pode ter vários progressos
 model Progress {
   id Int @id @default(autoincrement())
   userId Int
   user User @relation(fields: [userId], references: [id])
-  collectionId Int @unique
+  collectionId Int 
   collection Collection @relation(fields: [collectionId], references: [id])
   
   dateUpdate DateTime @default(now())
   dateCreated DateTime @default(now())
   
-  question_percents Int
-  card_percents Int
-
+  //question_percents Int @default(0)
+  //card_percents Int @default(0)
+  progressCards ProgressCard[] 
+  dateToRevision DateTime
 }
+
+model ProgressCard {
+  id Int @id @default(autoincrement())
+  progressId Int
+  progress Progress @relation(fields: [progressId], references: [id])
+
+  cardId Int
+  card Card @relation(fields: [cardId], references: [id])
+
+  category CardStatus
+  
+  dateCreated DateTime @default(now())
+}
+
 
 // Folder dados
 model Folder {
