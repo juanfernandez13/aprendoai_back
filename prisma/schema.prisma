@@ -39,7 +39,7 @@ model User {
   progress Progress[]
   collection Collection[]
   achievements Achievements[]
-
+  associatedCollection UserCollection[]
 }
 
 // Collection dados
@@ -56,8 +56,21 @@ model Collection {
   
   cards Card[]
   //questions Question[]
-  
+  associatedCollection UserCollection[]
   nameCollection String
+}
+
+model UserCollection {
+  id Int @id @default(autoincrement())
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+
+  collectionId Int
+  collection Collection @relation(fields: [collectionId], references: [id])
+
+  dateCreated DateTime @default(now())
+
+  @@unique([userId, collectionId])
 }
 
 model Card {

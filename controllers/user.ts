@@ -16,7 +16,7 @@ export const getUserById = async (userId: number) => {
   try {
     const Person = await prisma.user.findUnique({
       where: { id: userId },
-      include: { folder: true, collection: true, progress: true },
+      include: { folder: true, collection: true, progress: true, associatedCollection:true },
     });
 
     if (!Person) return { statusCode: 404, data: { error: "user not found" } };

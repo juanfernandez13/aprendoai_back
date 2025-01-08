@@ -1,6 +1,9 @@
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
 
+-- CreateEnum
+CREATE TYPE "CardStatus" AS ENUM ('Good', 'Medium', 'Bad');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
@@ -28,6 +31,16 @@ CREATE TABLE "Collection" (
 );
 
 -- CreateTable
+CREATE TABLE "UserCollection" (
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "collectionId" INTEGER NOT NULL,
+    "dateCreated" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "UserCollection_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Card" (
     "id" SERIAL NOT NULL,
     "collectionId" INTEGER NOT NULL,
@@ -40,39 +53,26 @@ CREATE TABLE "Card" (
 );
 
 -- CreateTable
-CREATE TABLE "Question" (
-    "id" SERIAL NOT NULL,
-    "collectionId" INTEGER NOT NULL,
-    "dateUpdate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "dateCreated" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "question" TEXT NOT NULL,
-
-    CONSTRAINT "Question_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Item" (
-    "id" SERIAL NOT NULL,
-    "questionId" INTEGER NOT NULL,
-    "dateUpdate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "dateCreated" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "value" TEXT NOT NULL,
-    "isCorrect" BOOLEAN NOT NULL,
-
-    CONSTRAINT "Item_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Progress" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
     "collectionId" INTEGER NOT NULL,
     "dateUpdate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "dateCreated" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "question_percents" INTEGER NOT NULL,
-    "card_percents" INTEGER NOT NULL,
+    "dateToRevision" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Progress_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ProgressCard" (
+    "id" SERIAL NOT NULL,
+    "progressId" INTEGER NOT NULL,
+    "cardId" INTEGER NOT NULL,
+    "category" "CardStatus" NOT NULL,
+    "dateCreated" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ProgressCard_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -113,7 +113,7 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "User_number_key" ON "User"("number");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Progress_collectionId_key" ON "Progress"("collectionId");
+CREATE UNIQUE INDEX "UserCollection_userId_collectionId_key" ON "UserCollection"("userId", "collectionId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Achievements_achievementName_key" ON "Achievements"("achievementName");
@@ -128,19 +128,25 @@ CREATE INDEX "_CollectionToFolder_B_index" ON "_CollectionToFolder"("B");
 ALTER TABLE "Collection" ADD CONSTRAINT "Collection_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "UserCollection" ADD CONSTRAINT "UserCollection_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserCollection" ADD CONSTRAINT "UserCollection_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "Collection"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Card" ADD CONSTRAINT "Card_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "Collection"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Question" ADD CONSTRAINT "Question_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "Collection"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Item" ADD CONSTRAINT "Item_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Progress" ADD CONSTRAINT "Progress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Progress" ADD CONSTRAINT "Progress_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "Collection"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ProgressCard" ADD CONSTRAINT "ProgressCard_progressId_fkey" FOREIGN KEY ("progressId") REFERENCES "Progress"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ProgressCard" ADD CONSTRAINT "ProgressCard_cardId_fkey" FOREIGN KEY ("cardId") REFERENCES "Card"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Folder" ADD CONSTRAINT "Folder_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

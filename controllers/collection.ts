@@ -33,17 +33,32 @@ export const getCollectionById = async (collectionId: number) => {
     return { statusCode: 500, data: "" };
   }
 };
-export const searchCollection = async (searchQuery: string, page:number) => {
+export const searchCollection = async (searchQuery: string, page:number, quantity: number) => {
   try {
     const collectionData = await prisma.collection.findMany({
       where: {nameCollection: {contains: searchQuery}},
-      take:12,
-      skip: 12*(page-1)
+      take:quantity,
+      skip: quantity*(page-1)
     });
 
     return { statusCode: 200, data: collectionData };
   } catch (error) {
     return { statusCode: 500, data: "" };
+  }
+};
+export const associateUserCollection = async (body:any) => {
+  try {
+    const all = await prisma.userCollection.findMany()
+    console.log(all, body)
+    const collectionData = await prisma.userCollection.create({
+      data: {
+        userId: body.userId,
+        collectionId: body.collectionId,
+      }
+    });
+    return { statusCode: 200, data: collectionData };
+  } catch (error) {
+    return { statusCode: 500, error: error };
   }
 };
 
