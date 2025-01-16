@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(statusCode).json(data);
     }
     case "POST": {
-      const { statusCode, data } = await createCollection({ ...body, userId: Number(id) });
+      const { statusCode, data } = await createCollection({ ...body, creatorId: Number(id) });
       return res.status(statusCode).json(data);
     }
 

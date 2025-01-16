@@ -10,7 +10,19 @@ interface CollectionFormat {
 
 export const getAllCollectionPerson = async (creatorId: number) => {
   try {
-    const collectionData = await prisma.collection.findMany({ where: { creatorId: creatorId } });
+    // const collectionData = await prisma.collection.findMany({ where: { creatorId: creatorId } },);
+    const collectionData = await prisma.collection.findMany({
+      where: {
+        OR: [
+          {
+            associatedCollection: {
+              some: { userId: creatorId },
+            },
+          },
+          { creatorId: creatorId },
+        ],
+      },
+    });
 
     return { statusCode: 200, data: collectionData };
   } catch (error) {
@@ -24,7 +36,7 @@ export const getCollectionById = async (collectionId: number) => {
       where: { id: collectionId },
       include: {
         folder: true,
-        cards: true
+        cards: true,
       },
     });
 
@@ -33,12 +45,12 @@ export const getCollectionById = async (collectionId: number) => {
     return { statusCode: 500, data: "" };
   }
 };
-export const searchCollection = async (searchQuery: string, page:number, quantity: number) => {
+export const searchCollection = async (searchQuery: string, page: number, quantity: number) => {
   try {
     const collectionData = await prisma.collection.findMany({
-      where: {nameCollection: {contains: searchQuery}},
-      take:quantity,
-      skip: quantity*(page-1)
+      where: { nameCollection: { contains: searchQuery } },
+      take: quantity,
+      skip: quantity * (page - 1),
     });
 
     return { statusCode: 200, data: collectionData };
@@ -46,15 +58,15 @@ export const searchCollection = async (searchQuery: string, page:number, quantit
     return { statusCode: 500, data: "" };
   }
 };
-export const associateUserCollection = async (body:any) => {
+
+export const associateUserCollection = async (body: any) => {
   try {
-    const all = await prisma.userCollection.findMany()
-    console.log(all, body)
+    const all = await prisma.userCollection.findMany();
     const collectionData = await prisma.userCollection.create({
       data: {
         userId: body.userId,
         collectionId: body.collectionId,
-      }
+      },
     });
     return { statusCode: 200, data: collectionData };
   } catch (error) {
@@ -80,7 +92,6 @@ export const createCollection = async (collection: CollectionFormat) => {
     });
     return { statusCode: 201, data: collectionData };
   } catch (error) {
-    console.log(error);
     return { statusCode: 500, data: error };
   }
 };

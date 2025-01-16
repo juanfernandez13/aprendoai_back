@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export const getAllProgressUser = async (userId: number) => {
   try {
-    const progress = await prisma.progress.findMany({ where: { userId: userId } });
+    const progress = await prisma.progress.findMany({ where: { userId: userId }, include: { progressCards: true } });
     return { statusCode: 200, data: progress };
   } catch (error) {
     return { statusCode: 500, data: error };
@@ -13,15 +13,25 @@ export const getAllProgressUser = async (userId: number) => {
 
 export const createProgress = async (progressData: any) => {
   try {
-    const progress = await prisma.progress.create({
-      data: {
-        dateToRevision: new Date(),
-        progressCards: {connect: []},
-        collectionId: progressData.collectionId,
-        userId: progressData.userId,
-      },
-    });
-    return { statusCode: 200, data: progress };
+    await prisma.$transaction(async (prisma) => {
+      const cards = await prisma.card.findMany({
+        where: { collectionId: progressData.collectionId },
+      });
+
+      const progress = await prisma.progress.create({
+        data: {
+          dateToRevision: new Date(),
+          collectionId: progressData.collectionId,
+          userId: progressData.userId,
+        },
+      });
+      await prisma.progressCard.createMany({
+        data: cards.map((card) => {
+          return { progressId: progress.id, cardId: card.id, category: "Medium" };
+        }),
+      });
+      return { statusCode: 200, data: progress };
+    })
   } catch (error) {
     return { statusCode: 500, data: error };
   }
@@ -35,8 +45,8 @@ export const updateProgress = async (progressData: any, progressId: number) => {
       },
       data: {
         dateToRevision: new Date(),
-        progressCards: {connect: []},
-        dateUpdate: new Date()
+        progressCards: { connect: [] },
+        dateUpdate: new Date(),
       },
     });
     return { statusCode: 200, data: progress };

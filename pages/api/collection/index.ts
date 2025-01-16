@@ -5,9 +5,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { method, body, query } = req;
+  const { method, query } = req;
   const { searchText, page = 1, quantity = 12 } = query;
-
   switch (method) {
     case "GET":
       const response = await searchCollection(

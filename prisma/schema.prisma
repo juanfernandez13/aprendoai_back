@@ -59,7 +59,6 @@ model Collection {
   
   nameCollection String
 
-  //questions Question[]
 }
 
 model UserCollection {
@@ -88,29 +87,6 @@ model Card {
   progress ProgressCard[]
 }
 
-/*model Question {
-  id Int @id @default(autoincrement())
-  collectionId Int
-  collection Collection @relation(fields: [collectionId], references: [id])
-  items Item[]
-  
-  dateUpdate DateTime @default(now())
-  dateCreated DateTime @default(now())
-  
-  question String
-}
-
-model Item {
-  id Int @id @default(autoincrement())
-  questionId Int
-  question Question @relation(fields: [questionId], references: [id])
-  
-  dateUpdate DateTime @default(now())
-  dateCreated DateTime @default(now())
-  
-  value String
-  isCorrect Boolean
-}*/
 
 //Um usuário pode ter vários progressos
 model Progress {
@@ -125,20 +101,18 @@ model Progress {
   
   progressCards ProgressCard[] 
   dateToRevision DateTime
-  
-  //question_percents Int @default(0)
-  //card_percents Int @default(0)|
+
 }
 
 model ProgressCard {
   id Int @id @default(autoincrement())
   progressId Int
-  progress Progress @relation(fields: [progressId], references: [id])
+  progress Progress @relation(fields: [progressId], references: [id], onDelete: Cascade)
 
   cardId Int
   card Card @relation(fields: [cardId], references: [id])
 
-  category CardStatus
+  category CardStatus @default(Medium)
   
   dateCreated DateTime @default(now())
 }

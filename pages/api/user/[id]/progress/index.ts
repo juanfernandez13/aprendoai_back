@@ -11,7 +11,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(statusCode).json(data);
     }
     case "POST": {
-      console.log({ ...body, userId: id });
       const { statusCode, data } = await createProgress({ ...body, userId: Number(id) });
       return res.status(statusCode).json(data);
     }
