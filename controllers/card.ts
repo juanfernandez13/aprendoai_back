@@ -94,7 +94,7 @@ export const deleteCard = async (cardId: number, creatorId: number) => {
 
 type status = "NOTREAD" | "BAD" | "MEDIUM" | "GOOD";
 
-export const genereteCards = async (userInput: string) => {
+export const genereteCards = async (userInput: string, quantity: number) => {
   const genAI = new GoogleGenerativeAI("é mole");
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -105,9 +105,9 @@ Você é um modelo de IA especializado em gerar flashcards para estudo.
 2. O formato de cada objeto deve ser exatamente o seguinte: 
    {"question": "Texto da pergunta", "answer": "Texto da resposta"}.
 3. NÃO inclua informações adicionais como "json", "aqui está sua resposta" ou qualquer outro texto.
-4. Retorne exatamente 12 flashcards com base no tema fornecido.
+4. Retorne exatamente ${quantity} flashcards com base no tema fornecido.
 
-TEMA FORNECIDO: ${userInput.trim()}
+TEMA FORNECIDO: ${userInput}
 `;
 
   const result = await model.generateContent(prompt);
@@ -120,5 +120,5 @@ TEMA FORNECIDO: ${userInput.trim()}
 
   const obj = JSON.parse(stringJson);
   console.log(obj);
-  return { statusCode: 200, data: stringJson };
+  return { statusCode: 200, data: obj};
 };

@@ -10,17 +10,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(statusCode).json(data);
     }
     case "POST": {
-      if (!genereteIA) {
-        const { statusCode, data } = await createCard({
+      if (genereteIA) {
+        const {inputUser, quantity} = body
+        console.log(body)
+        const { statusCode, data } = await genereteCards(inputUser, quantity);
+        return res.status(statusCode).json(data);
+      }
+
+      const { statusCode, data } = await createCard({
           ...body,
           collectionId: Number(collectionId),
           creatorId: Number(id),
         });
         return res.status(statusCode).json(data);
-      }
       
-      const { statusCode, data } = await genereteCards("Quero cards sobre história da espanha");
-      return res.status(statusCode).json(data);
     }
 
     default:
