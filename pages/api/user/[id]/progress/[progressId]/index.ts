@@ -1,4 +1,4 @@
-import { deleteProgress, updateProgress } from "@/controllers/progress";
+import { deleteProgress, respondCards, updateProgress } from "@/controllers/progress";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -7,6 +7,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   switch (method) {
     
+    case "POST": {
+      console.log(body, query)
+      const { statusCode, data } = await respondCards(body.answers, Number(progressId));
+      return res.status(statusCode).json(data);
+    }
     case "PUT": {
       const { statusCode, data } = await updateProgress(body, Number(progressId));
       return res.status(statusCode).json(data);

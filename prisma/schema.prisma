@@ -18,9 +18,10 @@ enum Role {
   ADMIN
 }
 enum CardStatus {
-  Good
-  Medium
-  Bad
+  GOOD
+  MEDIUM
+  BAD
+  NOTREAD
 }
 
 model User {
@@ -77,7 +78,7 @@ model UserCollection {
 model Card {
   id Int @id @default(autoincrement())
   collectionId Int
-  collection Collection @relation(fields: [collectionId], references: [id])
+  collection Collection @relation(fields: [collectionId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   
   dateUpdate DateTime @default(now())
   dateCreated DateTime @default(now())
@@ -87,14 +88,13 @@ model Card {
   progress ProgressCard[]
 }
 
-
 //Um usuário pode ter vários progressos
 model Progress {
   id Int @id @default(autoincrement())
   userId Int
   user User @relation(fields: [userId], references: [id])
   collectionId Int 
-  collection Collection @relation(fields: [collectionId], references: [id])
+  collection Collection @relation(fields: [collectionId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   
   dateUpdate DateTime @default(now())
   dateCreated DateTime @default(now())
@@ -102,26 +102,28 @@ model Progress {
   progressCards ProgressCard[] 
   dateToRevision DateTime
 
+  @@unique([userId, collectionId])
 }
 
 model ProgressCard {
-  id Int @id @default(autoincrement())
   progressId Int
-  progress Progress @relation(fields: [progressId], references: [id], onDelete: Cascade)
+  progress Progress @relation(fields: [progressId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   cardId Int
-  card Card @relation(fields: [cardId], references: [id])
+  card Card @relation(fields: [cardId], references: [id],  onUpdate: Cascade, onDelete: Cascade)
 
-  category CardStatus @default(Medium)
+  category CardStatus @default(NOTREAD)
   
   dateCreated DateTime @default(now())
+  @@id([progressId, cardId])
+  
 }
 
 // Folder dados
 model Folder {
   id Int @id @default(autoincrement())
   userId Int
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   collection Collection[]
   
   dateUpdate DateTime @default(now())

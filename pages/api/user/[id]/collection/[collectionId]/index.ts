@@ -3,19 +3,19 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { method, query, body } = req;
-  const { collectionId } = query;
+  const { collectionId, id } = query;
 
   switch (method) {
     case "GET": {
-      const { statusCode, data } = await getCollectionById(Number(collectionId));
+      const { statusCode, data } = await getCollectionById(Number(collectionId), Number(id));
       return res.status(statusCode).json(data);
     }
     case "PUT": {
-      const { statusCode, data } = await updateCollectionById(body, Number(collectionId));
+      const { statusCode, data } = await updateCollectionById({ ...body , creatorId: id}, Number(collectionId));
       return res.status(statusCode).json(data);
     }
     case "DELETE": {
-      const { statusCode, data } = await deleteCollectionById(Number(collectionId));
+      const { statusCode, data } = await deleteCollectionById(Number(collectionId), Number(id));
       return res.status(statusCode).json(data);
     }
 

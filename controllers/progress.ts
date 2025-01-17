@@ -13,12 +13,13 @@ export const getAllProgressUser = async (userId: number) => {
 
 export const createProgress = async (progressData: any) => {
   try {
+    let progress: any;
     await prisma.$transaction(async (prisma) => {
       const cards = await prisma.card.findMany({
         where: { collectionId: progressData.collectionId },
       });
 
-      const progress = await prisma.progress.create({
+      progress = await prisma.progress.create({
         data: {
           dateToRevision: new Date(),
           collectionId: progressData.collectionId,
@@ -27,12 +28,16 @@ export const createProgress = async (progressData: any) => {
       });
       await prisma.progressCard.createMany({
         data: cards.map((card) => {
-          return { progressId: progress.id, cardId: card.id, category: "Medium" };
+          return { progressId: progress.id, cardId: card.id, category: "NOTREAD" };
         }),
       });
       return { statusCode: 200, data: progress };
-    })
+    });
+
+    return { statusCode: 200, data: progress };
   } catch (error) {
+    console.log("Oi", error);
+
     return { statusCode: 500, data: error };
   }
 };
@@ -63,6 +68,28 @@ export const deleteProgress = async (progressId: number) => {
       },
     });
     return { statusCode: 200, data: progress };
+  } catch (error) {
+    return { statusCode: 500, data: error };
+  }
+};
+
+export const respondCards = async (answers: Array<any>, progressId: number) => {
+  try {
+    const data = await prisma.$transaction(
+      answers.map((answer) =>
+        prisma.progressCard.update({
+          where: {
+            progressId_cardId: {
+              progressId: progressId,
+              cardId: answer.cardId,
+            },
+          },
+          data: { category: answer.category },
+        })
+      )
+    );
+
+    return { statusCode: 200, data };
   } catch (error) {
     return { statusCode: 500, data: error };
   }
