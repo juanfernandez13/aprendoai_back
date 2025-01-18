@@ -85,6 +85,7 @@ model Card {
   
   question String
   answer String
+  isGeneratedAI Boolean @default(false)
   progress ProgressCard[]
 }
 

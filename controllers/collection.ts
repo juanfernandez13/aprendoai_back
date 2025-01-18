@@ -65,7 +65,6 @@ export const searchCollection = async (searchQuery: string, page: number, quanti
 export const associateUserCollection = async (body: any) => {
   try {
     let collectionData;
-    console.log(body);
     await prisma.$transaction(async (prisma) => {
       const collectionDataAssociated = await prisma.userCollection.create({
         data: {
@@ -73,7 +72,6 @@ export const associateUserCollection = async (body: any) => {
           collectionId: body.collectionId,
         },
       });
-      console.log(collectionDataAssociated);
       collectionData = collectionDataAssociated;
       await createProgress({ collectionId: body.collectionId, userId: body.userId });
     });

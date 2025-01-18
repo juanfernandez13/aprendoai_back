@@ -36,7 +36,6 @@ export const createProgress = async (progressData: any) => {
 
     return { statusCode: 200, data: progress };
   } catch (error) {
-    console.log("Oi", error);
 
     return { statusCode: 500, data: error };
   }

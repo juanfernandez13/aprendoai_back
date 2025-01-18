@@ -12,16 +12,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     case "POST": {
       if (genereteIA) {
         const {inputUser, quantity} = body
-        console.log(body)
-        const { statusCode, data } = await genereteCards(inputUser, quantity);
+        const { statusCode, data } = await genereteCards(inputUser, quantity, Number(collectionId), Number(id));
         return res.status(statusCode).json(data);
       }
 
-      const { statusCode, data } = await createCard({
+      const { statusCode, data } = await createCard(
+        {
           ...body,
-          collectionId: Number(collectionId),
-          creatorId: Number(id),
-        });
+        },
+        Number(collectionId),
+        Number(id)
+      );
         return res.status(statusCode).json(data);
       
     }
