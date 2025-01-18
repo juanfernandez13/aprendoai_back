@@ -8,10 +8,15 @@ export const getFlashcardsFromCollection = async (collectionId: number) => {
         collectionId: collectionId,
       },
     });
-    const flashcards = await Promise.all(collectionsFlashcards.map(async (collectionsFlashcard) => {
-      const flashcard = await prisma.flashcard.findUnique({ where: { id: collectionsFlashcard.flashcardId },include:{collectionFlashcard: {where: {collectionId:collectionId}}} });
-      return flashcard;
-    }))
+    const flashcards = await Promise.all(
+      collectionsFlashcards.map(async (collectionsFlashcard) => {
+        const flashcard = await prisma.flashcard.findUnique({
+          where: { id: collectionsFlashcard.flashcardId },
+          include: { collectionFlashcard: { where: { collectionId: collectionId } } },
+        });
+        return flashcard;
+      })
+    );
 
     const response = { data: flashcards, statusCode: 200, error: false };
 
@@ -22,13 +27,12 @@ export const getFlashcardsFromCollection = async (collectionId: number) => {
     return response;
   }
 };
-export const getFlashcardById = async (flashcardId: number) => {
+export const getFlashcardById = async (flashcardId: number, collectionId: number) => {
   try {
     const prisma = new PrismaClient();
     const flashcard = await prisma.flashcard.findUnique({
-      where: {
-        id: flashcardId,
-      },
+      where: { id: flashcardId },
+      include: { collectionFlashcard: { where: { collectionId: collectionId } } },
     });
 
     const response = { data: flashcard, statusCode: 200, error: false };
@@ -99,7 +103,6 @@ export const updateFlashcard = async (flashcardsData: any, flashcardId: number, 
 export const replyFlashcard = async (flashcardsData: any, collectionId: number, flashcardId: number) => {
   try {
     const prisma = new PrismaClient();
-    console.log(new Date());
     const flashcardUpdated = await prisma.collectionFlashcard.update({
       where: {
         collectionId_flashcardId: {
