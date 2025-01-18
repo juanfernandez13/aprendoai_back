@@ -59,6 +59,8 @@ model Collection {
   nameCollection String
   resumeCollection String
 
+  isCopyOf Int?
+
   collectionFlashcard CollectionFlashcard[]
 
   dateCreated DateTime @default(now())

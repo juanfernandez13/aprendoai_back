@@ -1,3 +1,4 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { PrismaClient } from "@prisma/client";
 
 export const getFlashcardsFromCollection = async (collectionId: number) => {
@@ -45,17 +46,24 @@ export const getFlashcardById = async (flashcardId: number, collectionId: number
   }
 };
 
-export const createFlashcards = async (flashcardsData: any, collectionId: number) => {
+export const createFlashcards = async (
+  flashcardsData: any,
+  userId: number,
+  collectionId: number,
+  generatedIA?: boolean
+) => {
   try {
+    console.log(flashcardsData)
     const prisma = new PrismaClient();
     const response = await prisma.$transaction(async (prisma) => {
       const flashcards = await Promise.all(
         flashcardsData.flashcards.map(async (flashcard: any) => {
           const flashcardCreated = await prisma.flashcard.create({
             data: {
-              userId: flashcardsData.userId,
+              userId: userId,
               question: flashcard.question,
               answer: flashcard.answer,
+              isGerenatedAI: generatedIA,
             },
           });
           const collectionflashcard = await prisma.collectionFlashcard.create({
@@ -143,4 +151,31 @@ export const deleteFlashcard = async (flashcardId: number) => {
 
     return response;
   }
+};
+
+
+export const createFlashcardsWithAI = async (userInput: string, quantity: number, userId:number, collectionId:number) => {
+  const genAI = new GoogleGenerativeAI("é mole");
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  const prompt = `
+"Você é um agente em um aplicativo de criação de flash cards. 
+*SUA RESPOSTA SEMPRE DEVE RETORNAR NO FORMATO LISTA COM OBJETOS NO FORMATO {\"question\": generete question, \"answer\": generete answer}*. 
+DEVOLVA SOMENTE NO FORMATO FORNECIDO E NADA ALÉM DISSO, OU SEJA NÃO INCLUA "json" OU "aqui está sua resposta" OU OUTRAS COISAS DESSA NATUREZA.
+Você deve gerar ${quantity} flashcards sobre o assunto que o usuário quiser. 
+O usuário digitou isso: ${userInput}
+`;
+  const result = await model.generateContent(prompt);
+  const data = result.response.text();
+
+  const stringJson = data
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+
+  const IAFlashcards = { flashcards: JSON.parse(stringJson) };
+
+  const response = await createFlashcards(IAFlashcards, userId, collectionId, true)
+
+  return response;
 };

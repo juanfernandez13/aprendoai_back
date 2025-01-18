@@ -1,9 +1,9 @@
-import { createFlashcards, getFlashcardsFromCollection } from "@/controllers/flashcard";
+import { createFlashcards, createFlashcardsWithAI, getFlashcardsFromCollection } from "@/controllers/flashcard";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { method, body, query } = req;
-  const { userId, collectionId } = query;
+  const { userId, collectionId, generatedIA } = query;
 
   switch (method) {
     case "GET": {
@@ -11,8 +11,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(response.statusCode).json(response);
     }
     case "POST": {
-      const flashcardData = { ...body, userId: Number(userId) };
-      const response = await createFlashcards(flashcardData, Number(collectionId));
+      if (generatedIA) {
+        const { userInput, quantity = 12 } = body;
+        const response = await createFlashcardsWithAI(userInput, quantity, Number(userId), Number(collectionId));
+        return res.status(response.statusCode).json(response);
+      }
+
+      const response = await createFlashcards(body, Number(userId), Number(collectionId));
       return res.status(response.statusCode).json(response);
     }
 

@@ -1,15 +1,28 @@
 import { PrismaClient } from "@prisma/client";
 
-export const copyCollection = async (userId: number, collectionId: number) => {
+export const copyOrUpdateCollection = async (userId: number, collectionId: number) => {
   try {
     const prisma = new PrismaClient();
 
     const collection = await prisma.collection.findUnique({ where: { id: collectionId } });
-    if (!collection) return { data: {}, statusCode: 404, error: false };
-    const { nameCollection, resumeCollection } = collection;
+    if (!collection) {
+      return { data: {}, statusCode: 404, error: false };
+    }
 
+    const isACopy = await prisma.collection.findFirst({ where: { userId: userId, isCopyOf: collection.id } });
+    if (isACopy) {
+      
+      return updateCollection(collectionId, isACopy.id);
+    }
+
+    const { nameCollection, resumeCollection } = collection;
     const collectionCreated = await prisma.collection.create({
-      data: { userId: userId, nameCollection: nameCollection, resumeCollection: resumeCollection },
+      data: {
+        userId: userId,
+        nameCollection: nameCollection,
+        resumeCollection: resumeCollection,
+        isCopyOf: collectionId,
+      },
     });
 
     const response = await prisma.$transaction(async (prisma) => {
@@ -22,7 +35,7 @@ export const copyCollection = async (userId: number, collectionId: number) => {
       });
 
       const allDataCollection = await prisma.collection.findUnique({
-        where: { id: collectionId },
+        where: { id: collectionCreated.id },
         include: { collectionFlashcard: true },
       });
       return { data: allDataCollection, statusCode: 200, error: false };
@@ -34,4 +47,38 @@ export const copyCollection = async (userId: number, collectionId: number) => {
 
     return response;
   }
+};
+
+const updateCollection = async (collectionId: number, collectionCopiedId: number) => {
+  const prisma = new PrismaClient();
+
+  const allCollectionFlashcards = await prisma.collectionFlashcard.findMany({ where: { collectionId: collectionId } });
+  const collectionFlashcards = await prisma.collectionFlashcard.findMany({
+    where: { collectionId: collectionCopiedId },
+  });
+
+  const flashcardsId = allCollectionFlashcards.map((collectionFlashcard) => collectionFlashcard.flashcardId);
+  const flashcardsId2 = collectionFlashcards.map( (collectionFlashcard) => collectionFlashcard.flashcardId);
+  
+  if (flashcardsId.length === flashcardsId2.length){
+    return {statusCode: 200, message: 'coleção já atualizada', error: false}
+  }
+
+  const flashcardsToCreate = flashcardsId.filter((value) => !flashcardsId2.includes(value))
+
+  await prisma.collectionFlashcard.createMany({
+    data: flashcardsToCreate.map((flashcardId) => {return { collectionId: collectionCopiedId, flashcardId:flashcardId};})
+  });
+  // await Promise.all(
+  //   flashcardsToCreate.map(async (flashcardsIdToCreate) => {
+  //     await prisma.collectionFlashcard.create({
+  //       data: {
+  //         collectionId: collectionCopiedId,
+  //         flashcardId: await flashcardsIdToCreate,
+  //       },
+  //     });
+  //   })
+  // );
+  
+  return { statusCode: 200, message: "coleção atualizada", error: false };
 };

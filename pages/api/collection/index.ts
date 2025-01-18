@@ -1,5 +1,5 @@
 import { getCollectionsByParams } from "@/controllers/collection";
-import { copyCollection } from "@/controllers/copyCollection";
+import { copyOrUpdateCollection } from "@/controllers/copyCollection";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -13,8 +13,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(response.statusCode).json(response);
     }
     case "POST": {
-      const { userId, collectionId } = body;
-      const response = await copyCollection(Number(userId), Number(collectionId));
+      const { userId, collectionId, userCopying } = body;
+      const response = await copyOrUpdateCollection(Number(userId), Number(collectionId), Number(userCopying));
       return res.status(response.statusCode).json(response);
     }
 
