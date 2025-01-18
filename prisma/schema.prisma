@@ -40,6 +40,7 @@ model User {
   dateCreated DateTime @default(now())
   
   collection Collection[]
+  flashcard Flashcard[]
   folder Folder[]
   userAchievements UserAchievements[]
 
@@ -74,7 +75,7 @@ model CollectionFlashcard {
   flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
 
   status FlashcardStatus @default(NOTREAD)
-  dateRevision DateTime
+  dateRevision DateTime?
 
   dateCreated DateTime @default(now())
   dateUpdate DateTime @default(now())
@@ -82,11 +83,15 @@ model CollectionFlashcard {
 
 model Flashcard  {
   id Int @id @default(autoincrement())
+  
+  userId Int
+  user User @relation(fields: [userId], references: [id])
 
   collectionFlashcard CollectionFlashcard[]
 
   question String
   answer String
+  isGerenatedAI Boolean @default(false)
   
   dateCreated DateTime @default(now())
   dateUpdate DateTime @default(now())
