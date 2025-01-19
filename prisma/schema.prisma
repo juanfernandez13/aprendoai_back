@@ -147,6 +147,7 @@ model FriendsList {
   userId Int
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  solicitaions Int[] //lista de ids
   friendsList Int[] //lista de ids
 
   dateCreated DateTime @default(now())

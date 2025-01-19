@@ -5,14 +5,14 @@ export const copyOrUpdateCollection = async (userId: number, collectionId: numbe
     const prisma = new PrismaClient();
 
     const collection = await prisma.collection.findUnique({ where: { id: collectionId } });
+
     if (!collection) {
       return { data: {}, statusCode: 404, error: false };
     }
 
-    const isACopy = await prisma.collection.findFirst({ where: { userId: userId, isCopyOf: collection.id } });
-    if (isACopy) {
-      
-      return updateCollection(collectionId, isACopy.id);
+    const existingCopy = await prisma.collection.findFirst({ where: { userId: userId, isCopyOf: collection.id } });
+    if (existingCopy) {
+      return updateCollection(collectionId, existingCopy.id);
     }
 
     const { nameCollection, resumeCollection } = collection;
@@ -69,16 +69,7 @@ const updateCollection = async (collectionId: number, collectionCopiedId: number
   await prisma.collectionFlashcard.createMany({
     data: flashcardsToCreate.map((flashcardId) => {return { collectionId: collectionCopiedId, flashcardId:flashcardId};})
   });
-  // await Promise.all(
-  //   flashcardsToCreate.map(async (flashcardsIdToCreate) => {
-  //     await prisma.collectionFlashcard.create({
-  //       data: {
-  //         collectionId: collectionCopiedId,
-  //         flashcardId: await flashcardsIdToCreate,
-  //       },
-  //     });
-  //   })
-  // );
+
   
   return { statusCode: 200, message: "coleção atualizada", error: false };
 };
