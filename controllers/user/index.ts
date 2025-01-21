@@ -37,6 +37,7 @@ export const createUser = async (userData: any) => {
     const prisma = new PrismaClient();
 
     const response = await prisma.$transaction(async (prisma) => {
+      
       const user = await prisma.user.create({
         data: {
           firstName: userData.firstName,
@@ -45,14 +46,14 @@ export const createUser = async (userData: any) => {
           password: userData.password,
         },
       });
-
+      
       await prisma.friendsList.create({ data: { userId: user.id } });
       return { data: user, statusCode: 201, error: false };
     });
-
     return response;
   } catch (error) {
-    const response = { message: error, statusCode: 500, error: true };
+    
+    const response = { data: error, statusCode: 500, error: true };
 
     return response;
   }

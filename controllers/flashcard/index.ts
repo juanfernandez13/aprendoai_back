@@ -53,7 +53,6 @@ export const createFlashcards = async (
   generatedIA?: boolean
 ) => {
   try {
-    console.log(flashcardsData)
     const prisma = new PrismaClient();
     const response = await prisma.$transaction(async (prisma) => {
       const flashcards = await Promise.all(

@@ -53,11 +53,12 @@ model Collection {
   userId Int
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  folderId Int?
-  folder Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
-
+//  folderId Int?
+//  folder Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  folder Folder[]
   nameCollection String
   resumeCollection String
+  resumeIsGeneratedAI Boolean @default(false)
 
   isCopyOf Int?
 

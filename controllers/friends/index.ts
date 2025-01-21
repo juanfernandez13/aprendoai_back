@@ -61,7 +61,6 @@ export const removeGuestFriendship = async (userId: number, userIdToRemove: numb
         WHERE "userId" = ${userId};`;
     const response = { message: "vencemo", statusCode: 200, error: true };
 
-    console.log(`Linhas afetadas: ${affectedRows}`);
     return response;
   } catch (error) {
     const response = { message: error, statusCode: 500, error: true };
