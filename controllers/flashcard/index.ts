@@ -154,27 +154,31 @@ export const deleteFlashcard = async (flashcardId: number) => {
 
 
 export const createFlashcardsWithAI = async (userInput: string, quantity: number, userId:number, collectionId:number) => {
-  const genAI = new GoogleGenerativeAI("é mole");
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  try {
+    const genAI = new GoogleGenerativeAI("é mole");
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  const prompt = `
+    const prompt = `
 "Você é um agente em um aplicativo de criação de flash cards. 
 *SUA RESPOSTA SEMPRE DEVE RETORNAR NO FORMATO LISTA COM OBJETOS NO FORMATO {\"question\": generete question, \"answer\": generete answer}*. 
 DEVOLVA SOMENTE NO FORMATO FORNECIDO E NADA ALÉM DISSO, OU SEJA NÃO INCLUA "json" OU "aqui está sua resposta" OU OUTRAS COISAS DESSA NATUREZA.
 Você deve gerar ${quantity} flashcards sobre o assunto que o usuário quiser. 
 O usuário digitou isso: ${userInput}
 `;
-  const result = await model.generateContent(prompt);
-  const data = result.response.text();
+    const result = await model.generateContent(prompt);
+    const data = result.response.text();
 
-  const stringJson = data
-    .replace(/```json/g, "")
-    .replace(/```/g, "")
-    .trim();
+    const stringJson = data
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-  const IAFlashcards = { flashcards: JSON.parse(stringJson) };
+    const IAFlashcards = { flashcards: JSON.parse(stringJson) };
 
-  const response = await createFlashcards(IAFlashcards, userId, collectionId, true)
+    const response = await createFlashcards(IAFlashcards, userId, collectionId, true);
 
-  return response;
+    return response;
+  } catch (error) {
+    return {error: true, statusCode: 500, data: error}
+  }
 };

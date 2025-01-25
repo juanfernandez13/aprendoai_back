@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { createUser } from "../user";
 import { genereteToken } from "@/utils/jwt";
 import { PrismaClient } from "@prisma/client";
+import { UserSerializer } from "@/serializers/user";
 
 export const loginUser = async (payload: any) => {
   try {
@@ -13,7 +14,8 @@ export const loginUser = async (payload: any) => {
       const isPasswordValid = await bcrypt.compare(payload.password, user.password);
       if (isPasswordValid) {
         const token = genereteToken(user);
-        return { token, statusCode: 200 };
+        const userSerializer = UserSerializer(user)
+        return { token, user: userSerializer, statusCode: 200 };
       } 
       return { message: "senha inválida", statusCode: 400, error: false };
     }

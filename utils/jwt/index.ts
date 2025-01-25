@@ -12,8 +12,8 @@ export const genereteToken = (payload: object): string => {
 export const verifyToken = (token: string): any => {
   try {
     const user = jwt.verify(token, secret);
-
-    return { isValid: true };
+    
+    return { isValid: true, user: user };
   } catch (error) {
     return { isValid: false };
   }
