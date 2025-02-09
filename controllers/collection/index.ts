@@ -19,6 +19,35 @@ export const getCollectionsById = async (collectionId: number) => {
   }
 };
 
+export const getCollectionsByFolderId = async (folderId: number, quantity: number, page: number) => {
+  try {
+    const prisma = new PrismaClient();
+    const collections = await prisma.collection.findMany({
+      where: {
+        folder: {
+          some: { id: folderId } // Ajuste para usar 'folder' corretamente no relacionamento de muitos para muitos
+        },
+      },
+      take: quantity,
+      skip: quantity * (page - 1),  // Controle da paginação
+    });
+
+    const response = { data: collections, statusCode: 200, error: false };
+
+    return response;
+  } catch (error) {
+    const response = { message: error, statusCode: 500, error: true };
+
+    return response;
+  }
+};
+
+
+
+
+
+
+
 export const getCollectionsByUserId = async (userId: number, quantity: number, page: number) => {
   try {
     const prisma = new PrismaClient();
@@ -67,8 +96,12 @@ export const createCollection = async (collectionData: any) => {
         userId: collectionData.userId,
         nameCollection: collectionData.nameCollection,
         resumeCollection: collectionData.resumeCollection,
+        folder: {
+          connect: { id: collectionData.folderId }, // Conecta a coleção à pasta com folderId
+        },
       },
     });
+
     const response = { data: collection, statusCode: 200, error: false };
 
     return response;
@@ -78,6 +111,7 @@ export const createCollection = async (collectionData: any) => {
     return response;
   }
 };
+
 
 export const updateCollectionById = async (collectionData: any, collectionId: number) => {
   try {

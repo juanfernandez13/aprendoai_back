@@ -48,41 +48,35 @@ model User {
   }
 
 model Collection {
-  id Int @id @default(autoincrement())
-
-  userId Int
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-//  folderId Int?
-//  folder Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  folder Folder[]
-  nameCollection String
-  resumeCollection String
-  resumeIsGeneratedAI Boolean @default(false)
-
-  isCopyOf Int?
-
-  collectionFlashcard CollectionFlashcard[]
-
-  dateCreated DateTime @default(now())
-  dateUpdate DateTime @default(now())
+  id                Int                @id @default(autoincrement())
+  userId            Int
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder            Folder[]           @relation("CollectionFolders") // Relacionamento com múltiplas pastas
+  nameCollection    String
+  resumeCollection  String
+  resumeIsGeneratedAI Boolean          @default(false)
+  collectionFlashcard CollectionFlashcard[] // Relacionamento oposto
+  dateCreated       DateTime           @default(now())
+  dateUpdate        DateTime           @default(now())
 }
+
 
 model CollectionFlashcard {
   @@id([collectionId, flashcardId])
 
   collectionId Int
-  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 
-  flashcardId Int
-  flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  flashcardId  Int
+  flashcard    Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
 
-  status FlashcardStatus @default(NOTREAD)
+  status       FlashcardStatus @default(NOTREAD)
   dateRevision DateTime?
 
-  dateCreated DateTime @default(now())
-  dateUpdate DateTime @default(now())
+  dateCreated  DateTime @default(now())
+  dateUpdate   DateTime @default(now())
 }
+
 
 model Flashcard  {
   id Int @id @default(autoincrement())
@@ -101,17 +95,13 @@ model Flashcard  {
 }
 
 model Folder {
-  id Int @id @default(autoincrement())
-
-  userId Int
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  nameFolder String
-
-  collection Collection[]
-
-  dateCreated DateTime @default(now())
-  dateUpdate DateTime @default(now())
+  id               Int         @id @default(autoincrement())
+  userId           Int
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nameFolder       String
+  collection       Collection[] @relation("CollectionFolders") // Relacionamento com múltiplas coleções
+  dateCreated      DateTime     @default(now())
+  dateUpdate       DateTime     @default(now())
 }
 
 model UserAchievements {
