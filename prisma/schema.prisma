@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,134 +7,142 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id               Int                @id @default(autoincrement())
+  firstName        String
+  lastName         String
+  email            String             @unique
+  password         String
+  type             Role               @default(USER)
+  dateUpdate       DateTime           @default(now())
+  dateCreated      DateTime           @default(now())
+  collection       Collection[]
+  flashcard        Flashcard[]
+  folder           Folder[]
+  friendsList      FriendsList?
+  summaries        Summary[]
+  userAchievements UserAchievements[]
+}
+
+model Collection {
+  id                  Int                   @id @default(autoincrement())
+  userId              Int
+  nameCollection      String
+  resumeCollection    String
+  dateCreated         DateTime              @default(now())
+  dateUpdate          DateTime              @default(now())
+  resumeIsGeneratedAI Boolean               @default(false)
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collectionFlashcard CollectionFlashcard[]
+  collectionSummary   CollectionSummary[]
+  folder              Folder[]              @relation("CollectionFolders")
+}
+
+model CollectionFlashcard {
+  collectionId Int
+  flashcardId  Int
+  status       FlashcardStatus @default(NOTREAD)
+  dateRevision DateTime?
+  dateCreated  DateTime        @default(now())
+  dateUpdate   DateTime        @default(now())
+  collection   Collection      @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  flashcard    Flashcard       @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, flashcardId])
+}
+
+model CollectionSummary {
+  @@id([collectionId, summaryId])
+
+  collectionId Int
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  summaryId Int
+  summary   Summary @relation(fields: [summaryId], references: [id], onDelete: Cascade)
+
+  dateCreated DateTime @default(now())
+  dateUpdate  DateTime @updatedAt
+}
+
+model Summary {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  collectionSummary CollectionSummary[]
+
+  content String
+  isGeneratedAI Boolean @default(false)
+
+  dateCreated DateTime @default(now())
+  dateUpdate  DateTime @updatedAt
+}
+
+
+model Flashcard {
+  id                  Int                   @id @default(autoincrement())
+  question            String
+  answer              String
+  dateCreated         DateTime              @default(now())
+  dateUpdate          DateTime              @default(now())
+  userId              Int
+  isGerenatedAI       Boolean               @default(false)
+  collectionFlashcard CollectionFlashcard[]
+  user                User                  @relation(fields: [userId], references: [id])
+}
+
+model Folder {
+  id          Int          @id @default(autoincrement())
+  userId      Int
+  nameFolder  String
+  dateCreated DateTime     @default(now())
+  dateUpdate  DateTime     @default(now())
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collection  Collection[] @relation("CollectionFolders")
+}
+
+model UserAchievements {
+  userId         Int
+  achievementsId Int
+  status         FlashcardStatus @default(NOTREAD)
+  dateRevision   DateTime
+  dateCreated    DateTime        @default(now())
+  dateUpdate     DateTime        @default(now())
+  achievements   Achievements    @relation(fields: [achievementsId], references: [id], onDelete: Cascade)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, achievementsId])
+}
+
+model Achievements {
+  id               Int                @id @default(autoincrement())
+  nameAchievements String
+  description      String
+  dateCreated      DateTime           @default(now())
+  dateUpdate       DateTime           @default(now())
+  userAchievements UserAchievements[]
+}
+
+model FriendsList {
+  userId       Int      @id
+  friendsList  Int[]
+  dateCreated  DateTime @default(now())
+  dateUpdate   DateTime @default(now())
+  solicitaions Int[]
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 enum Role {
   USER
   ADMIN
 }
 
 enum FlashcardStatus {
-  EXCELLENT    
-  GOOD         
-  MEDIUM       
-  POOR         
-  BAD          
-  NOTREAD      
-}
-
-model User {
-  id Int @id @default(autoincrement())
-
-  firstName String
-  lastName String
-  email String @unique
-  password String 
-  type Role @default(USER)
-
-  dateUpdate DateTime @default(now())
-  dateCreated DateTime @default(now())
-  
-  collection Collection[]
-  flashcard Flashcard[]
-  folder Folder[]
-  userAchievements UserAchievements[]
-
-  friendsList FriendsList?
-  }
-
-model Collection {
-  id                Int                @id @default(autoincrement())
-  userId            Int
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  folder            Folder[]           @relation("CollectionFolders") // Relacionamento com múltiplas pastas
-  nameCollection    String
-  resumeCollection  String
-  resumeIsGeneratedAI Boolean          @default(false)
-  collectionFlashcard CollectionFlashcard[] // Relacionamento oposto
-  dateCreated       DateTime           @default(now())
-  dateUpdate        DateTime           @default(now())
-}
-
-
-model CollectionFlashcard {
-  @@id([collectionId, flashcardId])
-
-  collectionId Int
-  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-
-  flashcardId  Int
-  flashcard    Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
-
-  status       FlashcardStatus @default(NOTREAD)
-  dateRevision DateTime?
-
-  dateCreated  DateTime @default(now())
-  dateUpdate   DateTime @default(now())
-}
-
-
-model Flashcard  {
-  id Int @id @default(autoincrement())
-  
-  userId Int
-  user User @relation(fields: [userId], references: [id])
-
-  collectionFlashcard CollectionFlashcard[]
-
-  question String
-  answer String
-  isGerenatedAI Boolean @default(false)
-  
-  dateCreated DateTime @default(now())
-  dateUpdate DateTime @default(now())
-}
-
-model Folder {
-  id               Int         @id @default(autoincrement())
-  userId           Int
-  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  nameFolder       String
-  collection       Collection[] @relation("CollectionFolders") // Relacionamento com múltiplas coleções
-  dateCreated      DateTime     @default(now())
-  dateUpdate       DateTime     @default(now())
-}
-
-model UserAchievements {
-  @@id([userId, achievementsId])
-
-  userId Int
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  achievementsId Int
-  achievements Achievements @relation(fields: [achievementsId], references: [id], onDelete: Cascade)
-
-  status FlashcardStatus @default(NOTREAD)
-  dateRevision DateTime
-
-  dateCreated DateTime @default(now())
-  dateUpdate DateTime @default(now())
-}
-
-model Achievements {
-  id Int @id @default(autoincrement())
-
-  nameAchievements String
-  description String
-
-  userAchievements UserAchievements[]
-
-  dateCreated DateTime @default(now())
-  dateUpdate DateTime @default(now())
-}
-
-model FriendsList {
-  @@id([userId])
-
-  userId Int
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  solicitaions Int[] //lista de ids
-  friendsList Int[] //lista de ids
-
-  dateCreated DateTime @default(now())
-  dateUpdate DateTime @default(now())
+  EXCELLENT
+  GOOD
+  MEDIUM
+  POOR
+  BAD
+  NOTREAD
 }
