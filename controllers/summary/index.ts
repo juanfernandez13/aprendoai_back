@@ -61,7 +61,7 @@ export const createSummaryWithAI = async (
   collectionId: number
 ) => {
   try {
-    const genAI = new GoogleGenerativeAI("");//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA p i?
+    const genAI = new GoogleGenerativeAI("Key");//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA p i?
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `

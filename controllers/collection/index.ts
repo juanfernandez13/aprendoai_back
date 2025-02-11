@@ -97,20 +97,22 @@ export const createCollection = async (collectionData: any) => {
         nameCollection: collectionData.nameCollection,
         resumeCollection: collectionData.resumeCollection,
         folder: {
-          connect: { id: collectionData.folderId }, // Conecta a coleção à pasta com folderId
+          connect: { id: collectionData.folderId },
         },
       },
     });
 
-    const response = { data: collection, statusCode: 200, error: false };
+    console.log("Nova coleção criada:", collection); // <--- ADICIONADO
 
+    const response = { data: collection, statusCode: 200, error: false };
     return response;
   } catch (error) {
+    console.error("Erro ao criar coleção:", error); // <--- ADICIONADO
     const response = { message: error, statusCode: 500, error: true };
-
     return response;
   }
 };
+
 
 
 export const updateCollectionById = async (collectionData: any, collectionId: number) => {

@@ -52,7 +52,6 @@ model CollectionFlashcard {
 }
 
 model CollectionSummary {
-  @@id([collectionId, summaryId])
 
   collectionId Int
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
@@ -62,6 +61,8 @@ model CollectionSummary {
 
   dateCreated DateTime @default(now())
   dateUpdate  DateTime @updatedAt
+
+  @@id([collectionId, summaryId])
 }
 
 model Summary {
@@ -72,18 +73,18 @@ model Summary {
 
   collectionSummary CollectionSummary[]
 
-  content String
+  content       String
   isGeneratedAI Boolean @default(false)
 
   dateCreated DateTime @default(now())
   dateUpdate  DateTime @updatedAt
 }
 
-
 model Flashcard {
   id                  Int                   @id @default(autoincrement())
   question            String
-  answer              String
+  options             String[] // Lista de opções de resposta
+  correctAnswer       String // Resposta correta
   dateCreated         DateTime              @default(now())
   dateUpdate          DateTime              @default(now())
   userId              Int

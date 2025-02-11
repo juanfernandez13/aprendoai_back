@@ -61,10 +61,13 @@ export const createFlashcards = async (
             data: {
               userId: userId,
               question: flashcard.question,
-              answer: flashcard.answer,
-              isGerenatedAI: generatedIA,
+              options: flashcard.options, // Certifique-se de que isso é um array de strings
+              correctAnswer: flashcard.correctAnswer,
+              isGerenatedAI: generatedIA ?? false,
             },
           });
+
+
           const collectionflashcard = await prisma.collectionFlashcard.create({
             data: { collectionId: collectionId, flashcardId: flashcardCreated.id },
           });
@@ -78,11 +81,10 @@ export const createFlashcards = async (
 
     return response;
   } catch (error) {
-    const response = { message: error, statusCode: 500, error: true };
-
-    return response;
+    return { message: error, statusCode: 500, error: true };
   }
 };
+
 
 export const updateFlashcard = async (flashcardsData: any, flashcardId: number, userId: number) => {
   try {
@@ -92,7 +94,7 @@ export const updateFlashcard = async (flashcardsData: any, flashcardId: number, 
       where: { id: flashcardId, userId: userId },
       data: {
         question: flashcardsData.question,
-        answer: flashcardsData.answer,
+      //  answer: flashcardsData.answer,
         dateUpdate: new Date(),
       },
     });
@@ -153,32 +155,31 @@ export const deleteFlashcard = async (flashcardId: number) => {
 };
 
 
-export const createFlashcardsWithAI = async (userInput: string, quantity: number, userId:number, collectionId:number) => {
+export const createFlashcardsWithAI = async (summaryInput: string, quantity: number, userId: number, collectionId: number) => {
   try {
-    const genAI = new GoogleGenerativeAI("AIzaSyA8wd6JmHymHBQKPQ3hib74azbBFi5372M");
+    const genAI = new GoogleGenerativeAI("KEY");
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
-"Você é um agente em um aplicativo de criação de flash cards. 
-*SUA RESPOSTA SEMPRE DEVE RETORNAR NO FORMATO LISTA COM OBJETOS NO FORMATO {\"question\": generete question, \"answer\": generete answer}*. 
-DEVOLVA SOMENTE NO FORMATO FORNECIDO E NADA ALÉM DISSO, OU SEJA NÃO INCLUA "json" OU "aqui está sua resposta" OU OUTRAS COISAS DESSA NATUREZA.
-Você deve gerar ${quantity} flashcards sobre o assunto que o usuário quiser. 
-O usuário digitou isso: ${userInput}
-`;
+      Você é um assistente de criação de flashcards. Gere ${quantity} flashcards no formato:
+      {
+        "question": "Texto da questão",
+        "options": ["Opção 1", "Opção 2", "Opção 3", "Opção 4"],
+        "correctAnswer": "Resposta correta"
+      }
+      O conteúdo é: ${summaryInput}
+      Apenas retorne a lista JSON sem texto adicional.
+    `;
+
     const result = await model.generateContent(prompt);
     const data = result.response.text();
 
-    const stringJson = data
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
-
+    const stringJson = data.replace(/```json/g, "").replace(/```/g, "").trim();
     const IAFlashcards = { flashcards: JSON.parse(stringJson) };
 
     const response = await createFlashcards(IAFlashcards, userId, collectionId, true);
-
     return response;
   } catch (error) {
-    return {error: true, statusCode: 500, data: error}
+    return { error: true, statusCode: 500, data: error };
   }
 };
