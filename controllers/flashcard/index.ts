@@ -157,7 +157,7 @@ export const deleteFlashcard = async (flashcardId: number) => {
 
 export const createFlashcardsWithAI = async (summaryInput: string, quantity: number, userId: number, collectionId: number) => {
   try {
-    const genAI = new GoogleGenerativeAI("AIzaSyA8wd6JmHymHBQKPQ3hib74azbBFi5372M");
+    const genAI = new GoogleGenerativeAI("API");
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
