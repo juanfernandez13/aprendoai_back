@@ -42,12 +42,6 @@ export const getCollectionsByFolderId = async (folderId: number, quantity: numbe
   }
 };
 
-
-
-
-
-
-
 export const getCollectionsByUserId = async (userId: number, quantity: number, page: number) => {
   try {
     const prisma = new PrismaClient();

@@ -4,16 +4,38 @@ export const getUserById = async (userId: number) => {
   try {
     const prisma = new PrismaClient();
 
-    const includeData = { collection: true, folder: true, friendsList: true, userAchievements: true };
-    const user = await prisma.user.findUnique({ where: { id: userId }, include: includeData });
+    // Obtendo dados do usuário com coleções
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { collection: { include: { collectionFlashcard: true } } },
+    });
 
-    const response = { data: user, statusCode: 200, error: false };
+    if (!user) {
+      return { message: "Usuário não encontrado", statusCode: 404, error: true };
+    }
+
+    // Contando coleções e flashcards
+    const totalCollections = user.collection.length;
+    const totalFlashcards = user.collection.reduce(
+      (count, collection) => count + collection.collectionFlashcard.length,
+      0
+    );
+
+    // Construindo resposta
+    const response = {
+      data: {
+        id: user.id,
+        name: `${user.firstName} ${user.lastName}`,
+        totalCollections,
+        totalFlashcards,
+      },
+      statusCode: 200,
+      error: false,
+    };
 
     return response;
   } catch (error) {
-    const response = { message: error, statusCode: 500, error: true };
-
-    return response;
+    return { message: error, statusCode: 500, error: true };
   }
 };
 
@@ -37,7 +59,7 @@ export const createUser = async (userData: any) => {
     const prisma = new PrismaClient();
 
     const response = await prisma.$transaction(async (prisma) => {
-      
+
       const user = await prisma.user.create({
         data: {
           firstName: userData.firstName,
@@ -46,13 +68,13 @@ export const createUser = async (userData: any) => {
           password: userData.password,
         },
       });
-      
+
       await prisma.friendsList.create({ data: { userId: user.id } });
       return { data: user, statusCode: 201, error: false };
     });
     return response;
   } catch (error) {
-    
+
     const response = { data: error, statusCode: 500, error: true };
 
     return response;
