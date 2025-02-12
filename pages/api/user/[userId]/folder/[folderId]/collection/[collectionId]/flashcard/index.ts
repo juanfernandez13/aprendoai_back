@@ -14,11 +14,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     case "POST": {
       if (generatedIA) {
-        const { userInput, quantity = 12 } = body;
+        const { userInput, quantity = 12 } = body; 
         const response = await createFlashcardsWithAI(userInput, quantity, Number(userId), Number(collectionId));
         return res.status(response.statusCode).json(response);
       }
-
+    
       const response = await createFlashcards(body, Number(userId), Number(collectionId));
       return res.status(response.statusCode).json(response);
     }
@@ -27,3 +27,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(405).json({ message: "Method not allowed", error: false, statusCode: 405 });
   }
 }
+
